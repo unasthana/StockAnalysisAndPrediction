@@ -104,25 +104,8 @@ def getPredictions(model, scaler, x_test, y_test):
 
 
 def zipModels(source_folder, destination_folder):
-
-  # Ensure the destination folder exists, create it if not
-  os.makedirs(destination_folder, exist_ok=True)
-
-  # List all folders in the source folder that start with 'lstm'
-  lstm_folders = [folder for folder in os.listdir(source_folder) if
-                  folder.startswith('lstm') and
-                  os.path.isdir(os.path.join(source_folder, folder))]
-
-  # Zip each folder individually and save it to the destination folder
-  for folder in lstm_folders:
-
-      source_path = os.path.join(source_folder, folder)
-      destination_path = os.path.join(destination_folder, f'{folder}')
-
-      shutil.make_archive(destination_path, 'zip', source_path)
-
-  shutil.make_archive("/content/zipped_models", 'zip', destination_folder)
-
+  
+  shutil.make_archive(destination_folder, 'zip', source_folder)
   print("Zipping completed!")
 
 
@@ -156,7 +139,7 @@ def on_epoch_end(self, epoch, logs=None):
             print(f"Saving model with RMSE: {rmse:.2f}\n")
 
             self.best_rmse = rmse
-            self.model.save(f"/content/prediction_models/{self.model_filename}")
+            self.model.save(f"/content/prediction_models/{self.model_filename}.h5")
 
 
 def main():
