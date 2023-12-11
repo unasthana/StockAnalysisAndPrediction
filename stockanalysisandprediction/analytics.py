@@ -338,44 +338,6 @@ def getMovingAverages(stock_ticker, analytic, ma_window="3_day", time="all_time"
     return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-def getRankings(analytic, time="all_time", ma_analytic="NA", ma_window="NA"):
-    stock_tickers = getStockTickers()
-
-    rankings = []
-
-    for stock_ticker in stock_tickers:
-        stock_data = getStockData(stock_ticker).set_index("date")
-
-        if analytic not in stock_data.columns:
-            analytic_data = getAnalyticData(
-                analytic, stock_ticker, time, ma_analytic, ma_window
-            )
-
-        else:
-            analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
-
-        if not isinstance(analytic_data, str):
-            rankings.append([stock_ticker, analytic_data[5]])
-
-    rankings.sort(key=lambda x: x[1], reverse=True)
-
-    return rankings
-
-
-def getDuration(start_date, end_date):
-    if not isinstance(start_date, str) and not isinstance(end_date, str):
-        x = end_date - start_date
-        return x.days if isinstance(x, pd.Timedelta) or isinstance(x, timedelta) else int(x)
-
-    start_date = datetime.strptime(start_date, "%Y-%m-%d")
-    end_date = datetime.strptime(end_date, "%Y-%m-%d")
-
-    time_difference = end_date - start_date
-    duration = time_difference.days
-
-    return duration
-
-
 def getLongestContinuousTrends(
     stock_ticker, analytic, time="all_time", ma_window="NA", ma_analytic="NA"
 ):
@@ -430,6 +392,30 @@ def getLongestContinuousTrends(
     return uptrend, downtrend
 
 
+def getRankings(analytic, time="all_time", ma_analytic="NA", ma_window="NA"):
+    stock_tickers = getStockTickers()
+
+    rankings = []
+
+    for stock_ticker in stock_tickers:
+        stock_data = getStockData(stock_ticker).set_index("date")
+
+        if analytic not in stock_data.columns:
+            analytic_data = getAnalyticData(
+                analytic, stock_ticker, time, ma_analytic, ma_window
+            )
+
+        else:
+            analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
+
+        if not isinstance(analytic_data, str):
+            rankings.append([stock_ticker, analytic_data[5]])
+
+    rankings.sort(key=lambda x: x[1], reverse=True)
+
+    return rankings
+
+
 def getCorrelationAnalytics(
     target_stock_ticker, analytic, time="all_time", ma_analytic="NA", ma_window="NA"
 ):
@@ -473,3 +459,21 @@ def getCorrelationAnalytics(
     mic_scores = mic_scores.sort_values(ascending=False)
 
     return mic_scores.to_dict()
+
+
+def getDuration(start_date, end_date):
+    if not isinstance(start_date, str) and not isinstance(end_date, str):
+        x = end_date - start_date
+        return (
+            x.days
+            if isinstance(x, pd.Timedelta) or isinstance(x, timedelta)
+            else int(x)
+        )
+
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    time_difference = end_date - start_date
+    duration = time_difference.days
+
+    return duration
