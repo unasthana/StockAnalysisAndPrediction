@@ -8,14 +8,9 @@ data = pd.read_csv("/content/all_stocks_5yr.csv")
 data.dropna(inplace=True)
 data.set_index("date")
 
-# NEED THIS API EXPOSED
-
 
 def getStockTickers(data):
     return data["Name"].unique()
-
-
-# NEED THIS API EXPOSED
 
 
 def getStockData(data, stock_ticker):
@@ -24,14 +19,9 @@ def getStockData(data, stock_ticker):
     return stock_data
 
 
-# API to calculate Daily Returns in a given time period.
-
-
 def getDailyReturns(stock_ticker, time="all_time"):
     stock_data = getStockData(data, stock_ticker).set_index("date")
     stock_data["Daily_Returns"] = stock_data["close"].pct_change()
-
-    # SEND stock_data['Daily_Returns'] back to the database as well
 
     time_values = {
         "all_time": len(stock_data),
@@ -66,14 +56,9 @@ def getDailyReturns(stock_ticker, time="all_time"):
     return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-# API to get Daily Price Change in a given time period.
-
-
 def getDailyPriceChange(stock_ticker, time="all_time"):
     stock_data = getStockData(data, stock_ticker).set_index("date")
     stock_data["Daily_Price_Change"] = stock_data["close"] - stock_data["open"]
-
-    # SEND stock_data['Daily_Price_Change'] back to the database as well
 
     time_values = {
         "all_time": len(stock_data),
@@ -108,14 +93,9 @@ def getDailyPriceChange(stock_ticker, time="all_time"):
     return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-# API to get Daily Price Range in a given time period.
-
-
 def getDailyPriceRange(stock_ticker, time="all_time"):
     stock_data = getStockData(data, stock_ticker).set_index("date")
     stock_data["Daily_Price_Range"] = stock_data["high"] - stock_data["low"]
-
-    # SEND stock_data['Daily_Price_Range'] back to the database as well
 
     time_values = {
         "all_time": len(stock_data),
@@ -150,14 +130,9 @@ def getDailyPriceRange(stock_ticker, time="all_time"):
     return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-# API to get Daily Price Gap in a given time period.
-
-
 def getDailyPriceGap(stock_ticker, time="all_time"):
     stock_data = getStockData(data, stock_ticker).set_index("date")
     stock_data["Daily_Price_Gap"] = stock_data["open"] - stock_data["close"].shift(1)
-
-    # SEND stock_data['Daily_Price_Gap'] back to the database as well
 
     time_values = {
         "all_time": len(stock_data),
@@ -198,7 +173,6 @@ def getYearlyPerformance(stock_ticker):
     if len(stock_data) < 253:
         return "Not enough data to calculate yearly performance. Please wait while we update our APIs. Thank you :)"
 
-    # Convert 'date' column to datetime type
     stock_data["date"] = pd.to_datetime(stock_data["date"])
 
     stock_data["year"] = stock_data["date"].dt.year
@@ -396,7 +370,7 @@ def getLongestContinuousTrends(
     else:
         analytic_data = getRawAnalyticData(stock_ticker, analytic, time)[0].dropna()
 
-    uptrend = [-1, "", ""]  # [duration, uptrend_start_date, uptrend_end_date]
+    uptrend = [-1, "", ""]
     uptrend_start_date = analytic_data.index[0]
 
     prev = 0
@@ -415,7 +389,7 @@ def getLongestContinuousTrends(
 
         prev = i
 
-    downtrend = [-1, "", ""]  # [duration, downtrend_start_date, downtrend_end_date]
+    downtrend = [-1, "", ""]
     downtrend_start_date = analytic_data.index[0]
 
     prev = 0
@@ -463,15 +437,12 @@ def getCorrelationAnalytics(
     combined_df.fillna(method="ffill", inplace=True)
     combined_df.fillna(method="bfill", inplace=True)
 
-    # Choose the target column for which you want MIC scores
     target_column = target_stock_ticker
 
-    # Create a DataFrame to store MIC scores
     mic_scores = pd.Series(
         index=combined_df.columns.difference([target_column]), dtype=float
     )
 
-    # Calculate MIC scores for the chosen target column
     for col in combined_df.columns.difference([target_column]):
         mine = MINE()
         mine.compute_score(combined_df[col], combined_df[target_column])

@@ -155,7 +155,6 @@ def getRankingsApi(request, analytic):
     ma_analytic = request.GET.get("ma_analytic", "NA")
     ma_window = request.GET.get("ma_window", "NA")
 
-    # Prepare parameters for cache check
     params = {
         "analytic": analytic,
         "time": time,
@@ -163,12 +162,10 @@ def getRankingsApi(request, analytic):
         "ma_window": ma_window,
     }
 
-    # Check cache
     cached_response = get_cached_response("getRankingsApi", params)
     if cached_response is not None:
         return JsonResponse(cached_response, safe=False)
 
-    # Call the actual function and cache the response
     data = getRankings(analytic, time, ma_analytic, ma_window)
     APICache.objects.create(
         api_name="getRankingsApi",
@@ -184,7 +181,6 @@ def getCorrelationAnalyticsApi(request, stock_ticker, analytic):
     ma_analytic = request.GET.get("ma_analytic", "NA")
     ma_window = request.GET.get("ma_window", "NA")
 
-    # Prepare parameters for cache check
     params = {
         "stock_ticker": stock_ticker,
         "analytic": analytic,
@@ -193,12 +189,10 @@ def getCorrelationAnalyticsApi(request, stock_ticker, analytic):
         "ma_window": ma_window,
     }
 
-    # Check cache
     cached_response = get_cached_response("getCorrelationAnalyticsApi", params)
     if cached_response is not None:
         return JsonResponse(cached_response, safe=False)
 
-    # Call the actual function and cache the response
     data = getCorrelationAnalytics(stock_ticker, analytic, time, ma_analytic, ma_window)
     APICache.objects.create(
         api_name="getCorrelationAnalyticsApi",

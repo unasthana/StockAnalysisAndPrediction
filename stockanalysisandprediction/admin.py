@@ -22,9 +22,7 @@ class APICacheAdmin(admin.ModelAdmin):
     readonly_fields = ("api_name", "params", "response")
 
     def has_add_permission(self, request, obj=None):
-        # Disable adding new entries from admin, if desired
         return False
 
     def has_delete_permission(self, request, obj=None):
-        # Disable delete, if desired
         return True
