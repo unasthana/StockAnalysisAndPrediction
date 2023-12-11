@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from stockanalysisandprediction/management/commands/train_prediction_model.py import getStockData, getTargetData, standardizeData, createDataPartitions, getPredictions
+from stockanalysisandprediction.management.commands.train_prediction_model.py import getStockData, getTargetData, standardizeData, createDataPartitions, getPredictions
 
 def makePrediction(data, stock_ticker):
 
