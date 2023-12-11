@@ -38,8 +38,7 @@ def load_model(ticker):
 def makePrediction(request, stock_ticker):
     # Get Stock Data particular to the corresponding stock ticker.
     stock_data = Stock.objects.filter(name=stock_ticker).values()
-    stock_data = pd.DataFrame(list(stock_data))
-
+    stock_data = pd.DataFrame(list(stock_data)).set_index("date")
     # Get Target Data. In our case, we are predicting the Close Price of the Stock.
     target_data = getTargetData(stock_data, "close")
 
@@ -58,5 +57,8 @@ def makePrediction(request, stock_ticker):
     train_data = stock_data[["close"]][:trainset_length]
     test_data = stock_data[["close"]][trainset_length:]
     test_data["predicted"] = result_df
-
-    return JsonResponse(str(train_data) + str(test_data), safe=False)
+    test_data.index = test_data.index.astype(str)
+    train_data.index = train_data.index.astype(str)
+    return JsonResponse(
+        {"train": train_data.to_dict(), "test": test_data.to_dict()}, safe=False
+    )
