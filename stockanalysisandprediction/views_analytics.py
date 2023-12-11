@@ -64,11 +64,10 @@ def getMovingAveragesApi(request, stock_ticker, analytic):
 
 
 def getRankingsApi(request, analytic):
-    top_n = request.GET.get('top_n', 'top_10')
     time = request.GET.get('time', 'all_time')
     ma_analytic = request.GET.get('ma_analytic', 'NA')
     ma_window = request.GET.get('ma_window', 'NA')
-    data = getRankings(analytic, top_n, time, ma_analytic, ma_window)
+    data = getRankings(analytic, time, ma_analytic, ma_window)
     return JsonResponse(str(data), safe=False)
 
 
