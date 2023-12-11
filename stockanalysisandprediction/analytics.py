@@ -5,7 +5,8 @@ from .models import Stock
 
 
 def getStockTickers():
-    return pd.Series(Stock.objects.values("name").distinct())
+    out = pd.Series(Stock.objects.values("name").distinct()).apply(lambda x: x['name'])
+    return out
 
 
 def getStockData(stock_ticker):
@@ -295,7 +296,6 @@ def getRankings(analytic, time='all_time',
     rankings = []
 
     for stock_ticker in stock_tickers:
-
         stock_data = getStockData(stock_ticker).set_index('date')
 
         if analytic not in stock_data.columns:
