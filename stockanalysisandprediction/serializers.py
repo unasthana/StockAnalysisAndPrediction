@@ -5,10 +5,10 @@ from .models import Stock
 class StockSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stock
-        fields = ['date', 'open', 'high', 'low', 'close', 'volume']
+        fields = ["date", "open", "high", "low", "close", "volume"]
 
 
 class StockNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Stock
-        fields = ['name']  # Only serialize the name field
+        fields = ["name"]  # Only serialize the name field
