@@ -1,5 +1,8 @@
+#!pip install minepy
+
 import pandas as pd
 from datetime import datetime
+from minepy import MINE
 
 data = pd.read_csv("/content/all_stocks_5yr.csv")
 data.dropna(inplace = True)
@@ -302,8 +305,7 @@ def getMovingAverages(stock_ticker, analytic, ma_window = "3_day",
   return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-
-def getRankings(analytic, top_n = 'top_10', time = 'all_time',
+def getRankings(analytic, time = 'all_time', 
                  ma_analytic = 'NA', ma_window = 'NA'):
 
   stock_tickers = getStockTickers(data)
@@ -313,23 +315,21 @@ def getRankings(analytic, top_n = 'top_10', time = 'all_time',
   for stock_ticker in stock_tickers:
 
     stock_data = getStockData(data, stock_ticker).set_index('date')
-
+    
     if analytic not in stock_data.columns:
-      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic,
+      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, 
                                       ma_window)
 
     else:
       analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
-
+    
     if not isinstance(analytic_data, str):
       rankings.append([stock_ticker, analytic_data[5]])
-
+  
   rankings.sort(key = lambda x: x[1], reverse = True)
 
-  return rankings[: int(top_n[4:])]
+  return rankings 
 
-getRankings(analytic = 'daily_returns', top_n = 'top_10', time = '1_week',
-                 ma_analytic = 'NA', ma_window = 'NA')
 
 def getDuration(start_date, end_date):
 
@@ -402,9 +402,9 @@ def getLongestContinuousTrends(stock_ticker, analytic, time='all_time',
 
     return uptrend, downtrend
 
-def getCorrelationAnalytics(stock_ticker, analytic, time = 'all_time',
+def getCorrelationAnalytics(target_stock_ticker, analytic, time = 'all_time', 
                             ma_analytic = 'NA', ma_window = 'NA'):
-
+  
   stock_tickers = getStockTickers(data)
   combined_df = pd.DataFrame(columns = stock_tickers)
 
@@ -414,15 +414,34 @@ def getCorrelationAnalytics(stock_ticker, analytic, time = 'all_time',
 
     if len(stock_data) <= 60:
       continue
-
+    
     if analytic not in stock_data.columns:
-      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic,
+      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, 
                                       ma_window)
 
     else:
       analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
-
+    
     if not isinstance(analytic_data, str):
       combined_df[f"{stock_ticker}"] = analytic_data[0]
+    
+  
+  combined_df.fillna(method = 'ffill', inplace = True)
+  combined_df.fillna(method = 'bfill', inplace = True)
 
-  return combined_df
+  # Choose the target column for which you want MIC scores
+  target_column = target_stock_ticker
+
+  # Create a DataFrame to store MIC scores
+  mic_scores = pd.Series(index=combined_df.columns.difference([target_column]), dtype=float)
+
+  # Calculate MIC scores for the chosen target column
+  for col in combined_df.columns.difference([target_column]):
+      mine = MINE()
+      mine.compute_score(combined_df
+      [col], combined_df[target_column])
+      mic_scores[col] = mine.mic()
+  
+  mic_scores = mic_scores.sort_values(ascending=False)
+    
+  return mic_scores.to_dict()
