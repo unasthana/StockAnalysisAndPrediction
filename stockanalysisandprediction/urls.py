@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.decorators.cache import cache_page
 
+from .clustering import makeCluster
 from .prediction import makePrediction
 from .views import (
     stock_detail,
@@ -88,4 +89,5 @@ urlpatterns = [
         cache_page(60 * 15)(makePrediction),
         name="make-prediction",
     ),
+    path("api/makeCluster/", cache_page(60 * 15)(makeCluster), name="make-cluster"),
 ]

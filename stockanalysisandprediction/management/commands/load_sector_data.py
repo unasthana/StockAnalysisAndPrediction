@@ -5,10 +5,9 @@ from stockanalysisandprediction.models import Stock, CompanyInfo
 
 
 class Command(BaseCommand):
-    help = "Load a stocks csv file into the database"
+    help = "Load sector csv file into the database"
 
     def handle(self, *args, **kwargs):
-        # Stock.objects.all().delete() #DEBUG ONLY
         if not CompanyInfo.objects.exists():
             data = pd.read_csv(
                 os.path.join(

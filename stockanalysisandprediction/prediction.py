@@ -36,16 +36,10 @@ def load_model(ticker):
 
 @api_view(["GET"])
 def makePrediction(request, stock_ticker):
-    
     stock_data = Stock.objects.filter(name=stock_ticker).values()
     stock_data = pd.DataFrame(list(stock_data)).set_index("date")
-    
     target_data = getTargetData(stock_data, "close")
-
-    
     scaled_data, scaler = standardizeData(target_data)
-
-    
     x_train, y_train, x_test, y_test = createDataPartitions(
         scaled_data, target_data, 0.95
     )
