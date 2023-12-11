@@ -18,7 +18,14 @@ from .analytics import (
 @api_view(["GET"])
 def getDailyReturnsApi(request, stock_ticker):
     time = request.GET.get("time", "all_time")
-    return JsonResponse(str(getDailyReturns(stock_ticker, time)), safe=False)
+    response = list(getDailyReturns(stock_ticker, time))
+    response[0].index = response[0].index.astype(str)
+    response[0] = response[0].to_dict()
+
+    response = [str(x) if not isinstance(x,dict) else x for x in response]
+    print(len(response))
+    keys = ["result_df", "max_result", "max_date", "min_result", "min_date", "avg_result"]
+    return JsonResponse(dict(zip(keys, response)), safe=False)
 
 
 def getDailyPriceChangeApi(request, stock_ticker):
