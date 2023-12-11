@@ -25,7 +25,9 @@ from .views_analytics import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("stocks/", cache_page(60 * 15)(stock_name_list), name="stock-name-list"),
-    path("stocks/<str:ticker>/", cache_page(60 * 15)(stock_detail), name="stock-detail"),
+    path(
+        "stocks/<str:ticker>/", cache_page(60 * 15)(stock_detail), name="stock-detail"
+    ),
     path(
         "api/getDailyReturns/<str:stock_ticker>/",
         cache_page(60 * 15)(getDailyReturnsApi),
@@ -66,9 +68,11 @@ urlpatterns = [
         cache_page(60 * 15)(getMovingAveragesApi),
         name="get-moving-averages-api",
     ),
-    path("api/getRankings/<str:analytic>/",
-         cache_page(60 * 15)(getRankingsApi),
-         name="get-rankings-api"),
+    path(
+        "api/getRankings/<str:analytic>/",
+        cache_page(60 * 15)(getRankingsApi),
+        name="get-rankings-api",
+    ),
     path(
         "api/getLongestContinuousTrends/<str:stock_ticker>/<str:analytic>/",
         cache_page(60 * 15)(getLongestContinuousTrendsApi),
@@ -82,6 +86,6 @@ urlpatterns = [
     path(
         "api/getPrediction/<str:stock_ticker>",
         cache_page(60 * 15)(makePrediction),
-        name="make-prediction"
+        name="make-prediction",
     ),
 ]

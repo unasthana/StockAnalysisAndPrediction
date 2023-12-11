@@ -5,187 +5,215 @@ from datetime import datetime
 from minepy import MINE
 
 data = pd.read_csv("/content/all_stocks_5yr.csv")
-data.dropna(inplace = True)
+data.dropna(inplace=True)
 data.set_index("date")
 
 # NEED THIS API EXPOSED
 
-def getStockTickers(data):
 
-  return data['Name'].unique()
+def getStockTickers(data):
+    return data["Name"].unique()
+
 
 # NEED THIS API EXPOSED
 
+
 def getStockData(data, stock_ticker):
+    stock_data = data[data["Name"] == stock_ticker]
 
-  stock_data = data[data['Name'] == stock_ticker]
+    return stock_data
 
-  return stock_data
 
 # API to calculate Daily Returns in a given time period.
 
-def getDailyReturns(stock_ticker, time = 'all_time'):
 
-  stock_data = getStockData(data, stock_ticker).set_index('date')
-  stock_data['Daily_Returns'] = stock_data['close'].pct_change()
+def getDailyReturns(stock_ticker, time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
+    stock_data["Daily_Returns"] = stock_data["close"].pct_change()
 
-  # SEND stock_data['Daily_Returns'] back to the database as well
+    # SEND stock_data['Daily_Returns'] back to the database as well
 
-  time_values = {"all_time": len(stock_data), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
+    time_values = {
+        "all_time": len(stock_data),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
 
-  if time.startswith('custom'):
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
 
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
+    if len(stock_data) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
 
-  if len(stock_data) < time_values[time]:
-      return "Data is not available. Please reduce your time window!"
+    if time == "all_time":
+        result_df = stock_data["Daily_Returns"]
+    else:
+        result_df = stock_data["Daily_Returns"][-time_values[time] :]
 
-  if time == 'all_time':
-      result_df = stock_data['Daily_Returns']
-  else:
-      result_df = stock_data['Daily_Returns'][-time_values[time]:]
+    result_df.dropna(inplace=True)
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
 
-  result_df.dropna(inplace = True)
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
-
-  return result_df, max_result, max_date, min_result, min_date, avg_result
+    return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
 # API to get Daily Price Change in a given time period.
 
-def getDailyPriceChange(stock_ticker, time = 'all_time'):
 
-  stock_data = getStockData(data, stock_ticker).set_index('date')
-  stock_data['Daily_Price_Change'] = stock_data['close'] - stock_data['open']
+def getDailyPriceChange(stock_ticker, time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
+    stock_data["Daily_Price_Change"] = stock_data["close"] - stock_data["open"]
 
-  # SEND stock_data['Daily_Price_Change'] back to the database as well
+    # SEND stock_data['Daily_Price_Change'] back to the database as well
 
-  time_values = {"all_time": len(stock_data), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
+    time_values = {
+        "all_time": len(stock_data),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
 
-  if time.startswith('custom'):
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
 
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
+    if len(stock_data) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
 
-  if len(stock_data) < time_values[time]:
-      return "Data is not available. Please reduce your time window!"
+    if time == "all_time":
+        result_df = stock_data["Daily_Price_Change"]
+    else:
+        result_df = stock_data["Daily_Price_Change"][-time_values[time] :]
 
-  if time == 'all_time':
-      result_df = stock_data['Daily_Price_Change']
-  else:
-      result_df = stock_data['Daily_Price_Change'][-time_values[time]:]
+    result_df.dropna(inplace=True)
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
 
-  result_df.dropna(inplace = True)
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
+    return result_df, max_result, max_date, min_result, min_date, avg_result
 
-  return result_df, max_result, max_date, min_result, min_date, avg_result
 
 # API to get Daily Price Range in a given time period.
 
-def getDailyPriceRange(stock_ticker, time = 'all_time'):
 
-  stock_data = getStockData(data, stock_ticker).set_index('date')
-  stock_data['Daily_Price_Range'] = stock_data['high'] - stock_data['low']
+def getDailyPriceRange(stock_ticker, time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
+    stock_data["Daily_Price_Range"] = stock_data["high"] - stock_data["low"]
 
-  # SEND stock_data['Daily_Price_Range'] back to the database as well
+    # SEND stock_data['Daily_Price_Range'] back to the database as well
 
-  time_values = {"all_time": len(stock_data), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
+    time_values = {
+        "all_time": len(stock_data),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
 
-  if time.startswith('custom'):
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
 
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
+    if len(stock_data) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
 
-  if len(stock_data) < time_values[time]:
-      return "Data is not available. Please reduce your time window!"
+    if time == "all_time":
+        result_df = stock_data["Daily_Price_Range"]
+    else:
+        result_df = stock_data["Daily_Price_Range"][-time_values[time] :]
 
-  if time == 'all_time':
-      result_df = stock_data['Daily_Price_Range']
-  else:
-      result_df = stock_data['Daily_Price_Range'][-time_values[time]:]
+    result_df.dropna(inplace=True)
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
 
-  result_df.dropna(inplace = True)
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
+    return result_df, max_result, max_date, min_result, min_date, avg_result
 
-  return result_df, max_result, max_date, min_result, min_date, avg_result
 
 # API to get Daily Price Gap in a given time period.
 
-def getDailyPriceGap(stock_ticker, time = 'all_time'):
 
-  stock_data = getStockData(data, stock_ticker).set_index('date')
-  stock_data['Daily_Price_Gap'] = stock_data['open'] - stock_data['close'].shift(1)
+def getDailyPriceGap(stock_ticker, time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
+    stock_data["Daily_Price_Gap"] = stock_data["open"] - stock_data["close"].shift(1)
 
-  # SEND stock_data['Daily_Price_Gap'] back to the database as well
+    # SEND stock_data['Daily_Price_Gap'] back to the database as well
 
-  time_values = {"all_time": len(stock_data), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
+    time_values = {
+        "all_time": len(stock_data),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
 
-  if time.startswith('custom'):
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
 
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
+    if len(stock_data) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
 
-  if len(stock_data) < time_values[time]:
-      return "Data is not available. Please reduce your time window!"
+    if time == "all_time":
+        result_df = stock_data["Daily_Price_Gap"]
+    else:
+        result_df = stock_data["Daily_Price_Gap"][-time_values[time] :]
 
-  if time == 'all_time':
-      result_df = stock_data['Daily_Price_Gap']
-  else:
-      result_df = stock_data['Daily_Price_Gap'][-time_values[time]:]
+    result_df.dropna(inplace=True)
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
 
-  result_df.dropna(inplace = True)
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
+    return result_df, max_result, max_date, min_result, min_date, avg_result
 
-  return result_df, max_result, max_date, min_result, min_date, avg_result
 
 def getYearlyPerformance(stock_ticker):
-
     stock_data = getStockData(data, stock_ticker)
 
     if len(stock_data) < 253:
         return "Not enough data to calculate yearly performance. Please wait while we update our APIs. Thank you :)"
 
     # Convert 'date' column to datetime type
-    stock_data['date'] = pd.to_datetime(stock_data['date'])
+    stock_data["date"] = pd.to_datetime(stock_data["date"])
 
-    stock_data['year'] = stock_data['date'].dt.year
-    stock_data['Yearly_Performance'] = ((stock_data.groupby('year')['close']
-                                         .transform('last') / stock_data
-                                         .groupby('year')['close'].
-                                         transform('first')) - 1) * 100
+    stock_data["year"] = stock_data["date"].dt.year
+    stock_data["Yearly_Performance"] = (
+        (
+            stock_data.groupby("year")["close"].transform("last")
+            / stock_data.groupby("year")["close"].transform("first")
+        )
+        - 1
+    ) * 100
 
-    result_df = pd.DataFrame({"Yearly_Performance":
-                              stock_data['Yearly_Performance'].unique()},
-                             index = stock_data['year'].unique())
+    result_df = pd.DataFrame(
+        {"Yearly_Performance": stock_data["Yearly_Performance"].unique()},
+        index=stock_data["year"].unique(),
+    )
 
     result_df = result_df["Yearly_Performance"]
 
@@ -198,143 +226,153 @@ def getYearlyPerformance(stock_ticker):
     return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-def getRawAnalyticData(stock_ticker, raw_analytic, time = 'all_time'):
+def getRawAnalyticData(stock_ticker, raw_analytic, time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
 
-  stock_data = getStockData(data, stock_ticker).set_index('date')
+    time_values = {
+        "all_time": len(stock_data),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
 
-  time_values = {"all_time": len(stock_data), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
 
-  if time.startswith('custom'):
+    if len(stock_data) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
 
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
+    if time == "all_time":
+        result_df = stock_data[raw_analytic]
+    else:
+        result_df = stock_data[raw_analytic][-time_values[time] :]
 
-  if len(stock_data) < time_values[time]:
-      return "Data is not available. Please reduce your time window!"
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
 
-  if time == 'all_time':
-      result_df = stock_data[raw_analytic]
-  else:
-      result_df = stock_data[raw_analytic][-time_values[time]:]
-
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
-
-  return result_df, max_result, max_date, min_result, min_date, avg_result
-
-def getAnalyticData(analytic, stock_ticker, time = 'all_time',
-                    ma_analytic = 'NA', ma_window = 'NA'):
-
-  if analytic == 'yearly_performance':
-    res = getYearlyPerformance(stock_ticker)
-
-  elif analytic == 'daily_price_gap':
-    res = getDailyPriceGap(stock_ticker, time)
-
-  elif analytic == 'daily_price_range':
-    res = getDailyPriceRange(stock_ticker, time)
-
-  elif analytic == 'daily_price_change':
-    res = getDailyPriceChange(stock_ticker, time)
-
-  elif analytic == 'daily_returns':
-    res = getDailyReturns(stock_ticker, time)
-
-  elif analytic == 'moving_averages':
-    res = getMovingAverages(stock_ticker, ma_analytic, ma_window, time)
-
-  return res
-
-def getMovingAverages(stock_ticker, analytic, ma_window = "3_day",
-                      time = 'all_time'):
-
-  stock_data = getStockData(data, stock_ticker).set_index('date')
-
-  if analytic not in stock_data.columns:
-    analytic_data = getAnalyticData(analytic, stock_ticker)[0]
-
-  else:
-    analytic_data = stock_data[analytic]
-
-  ma_window_values = {"3_day": 3, "5_day": 5, "10_day": 10,
-                  "30_day": 30, "60_day": 60}
-
-  if ma_window.startswith('custom'):
-
-    ma_window_value = int(ma_window[7:])
-    ma_window = 'custom'
-    ma_window_values["custom"] = ma_window_value
-
-  if len(analytic_data) < ma_window_values[ma_window]:
-    return "Data is not available. Please reduce your Moving Average Time Window!"
-
-  MA_analytic = analytic_data.rolling(window = ma_window_values[ma_window]).mean()
-
-  time_values = {"all_time": len(MA_analytic), "1_week": 5, "2_weeks": 10,
-                  "1_month": 22, "1_quarter": 66, "6_months": 132,
-                  "1_year": 253}
-
-  if time.startswith('custom'):
-
-    time_value = int(time[7:])
-    time = 'custom'
-    time_values["custom"] = time_value
-
-  if len(MA_analytic) < time_values[time]:
-    return "Data is not available. Please reduce your time window!"
-
-  if time == 'all_time':
-    result_df = MA_analytic
-
-  else:
-    result_df = MA_analytic[-time_values[time]:]
-
-  result_df.dropna(inplace = True)
-  max_result = result_df.max()
-  min_result = result_df.min()
-  max_date = result_df.idxmax()
-  min_date = result_df.idxmin()
-  avg_result = result_df.mean()
-
-  return result_df, max_result, max_date, min_result, min_date, avg_result
+    return result_df, max_result, max_date, min_result, min_date, avg_result
 
 
-def getRankings(analytic, time = 'all_time', 
-                 ma_analytic = 'NA', ma_window = 'NA'):
+def getAnalyticData(
+    analytic, stock_ticker, time="all_time", ma_analytic="NA", ma_window="NA"
+):
+    if analytic == "yearly_performance":
+        res = getYearlyPerformance(stock_ticker)
 
-  stock_tickers = getStockTickers(data)
+    elif analytic == "daily_price_gap":
+        res = getDailyPriceGap(stock_ticker, time)
 
-  rankings = []
+    elif analytic == "daily_price_range":
+        res = getDailyPriceRange(stock_ticker, time)
 
-  for stock_ticker in stock_tickers:
+    elif analytic == "daily_price_change":
+        res = getDailyPriceChange(stock_ticker, time)
 
-    stock_data = getStockData(data, stock_ticker).set_index('date')
-    
+    elif analytic == "daily_returns":
+        res = getDailyReturns(stock_ticker, time)
+
+    elif analytic == "moving_averages":
+        res = getMovingAverages(stock_ticker, ma_analytic, ma_window, time)
+
+    return res
+
+
+def getMovingAverages(stock_ticker, analytic, ma_window="3_day", time="all_time"):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
+
     if analytic not in stock_data.columns:
-      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, 
-                                      ma_window)
+        analytic_data = getAnalyticData(analytic, stock_ticker)[0]
 
     else:
-      analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
-    
-    if not isinstance(analytic_data, str):
-      rankings.append([stock_ticker, analytic_data[5]])
-  
-  rankings.sort(key = lambda x: x[1], reverse = True)
+        analytic_data = stock_data[analytic]
 
-  return rankings 
+    ma_window_values = {
+        "3_day": 3,
+        "5_day": 5,
+        "10_day": 10,
+        "30_day": 30,
+        "60_day": 60,
+    }
+
+    if ma_window.startswith("custom"):
+        ma_window_value = int(ma_window[7:])
+        ma_window = "custom"
+        ma_window_values["custom"] = ma_window_value
+
+    if len(analytic_data) < ma_window_values[ma_window]:
+        return "Data is not available. Please reduce your Moving Average Time Window!"
+
+    MA_analytic = analytic_data.rolling(window=ma_window_values[ma_window]).mean()
+
+    time_values = {
+        "all_time": len(MA_analytic),
+        "1_week": 5,
+        "2_weeks": 10,
+        "1_month": 22,
+        "1_quarter": 66,
+        "6_months": 132,
+        "1_year": 253,
+    }
+
+    if time.startswith("custom"):
+        time_value = int(time[7:])
+        time = "custom"
+        time_values["custom"] = time_value
+
+    if len(MA_analytic) < time_values[time]:
+        return "Data is not available. Please reduce your time window!"
+
+    if time == "all_time":
+        result_df = MA_analytic
+
+    else:
+        result_df = MA_analytic[-time_values[time] :]
+
+    result_df.dropna(inplace=True)
+    max_result = result_df.max()
+    min_result = result_df.min()
+    max_date = result_df.idxmax()
+    min_date = result_df.idxmin()
+    avg_result = result_df.mean()
+
+    return result_df, max_result, max_date, min_result, min_date, avg_result
+
+
+def getRankings(analytic, time="all_time", ma_analytic="NA", ma_window="NA"):
+    stock_tickers = getStockTickers(data)
+
+    rankings = []
+
+    for stock_ticker in stock_tickers:
+        stock_data = getStockData(data, stock_ticker).set_index("date")
+
+        if analytic not in stock_data.columns:
+            analytic_data = getAnalyticData(
+                analytic, stock_ticker, time, ma_analytic, ma_window
+            )
+
+        else:
+            analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
+
+        if not isinstance(analytic_data, str):
+            rankings.append([stock_ticker, analytic_data[5]])
+
+    rankings.sort(key=lambda x: x[1], reverse=True)
+
+    return rankings
 
 
 def getDuration(start_date, end_date):
-
     if not isinstance(start_date, str) and not isinstance(end_date, str):
-      return (end_date - start_date)
+        return end_date - start_date
 
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
@@ -344,104 +382,101 @@ def getDuration(start_date, end_date):
 
     return duration
 
-def getLongestContinuousTrends(stock_ticker, analytic, time='all_time',
-                               ma_window='NA', ma_analytic='NA'):
 
-    stock_data = getStockData(data, stock_ticker).set_index('date')
+def getLongestContinuousTrends(
+    stock_ticker, analytic, time="all_time", ma_window="NA", ma_analytic="NA"
+):
+    stock_data = getStockData(data, stock_ticker).set_index("date")
 
     if analytic not in stock_data.columns:
-        analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, ma_window)[0].dropna()
+        analytic_data = getAnalyticData(
+            analytic, stock_ticker, time, ma_analytic, ma_window
+        )[0].dropna()
 
     else:
         analytic_data = getRawAnalyticData(stock_ticker, analytic, time)[0].dropna()
 
-    uptrend = [-1, "", ""] # [duration, uptrend_start_date, uptrend_end_date]
+    uptrend = [-1, "", ""]  # [duration, uptrend_start_date, uptrend_end_date]
     uptrend_start_date = analytic_data.index[0]
 
     prev = 0
 
     for i in range(1, len(analytic_data)):
+        if analytic_data.iloc[i] < analytic_data.iloc[prev]:
+            uptrend_end_date = analytic_data.index[prev]
+            duration = getDuration(uptrend_start_date, uptrend_end_date)
 
-      if analytic_data.iloc[i] < analytic_data.iloc[prev]:
+            if duration >= uptrend[0]:
+                uptrend[0] = duration
+                uptrend[1] = uptrend_start_date
+                uptrend[2] = uptrend_end_date
 
-        uptrend_end_date = analytic_data.index[prev]
-        duration = getDuration(uptrend_start_date, uptrend_end_date)
+            uptrend_start_date = analytic_data.index[i]
 
-        if duration >= uptrend[0]:
+        prev = i
 
-          uptrend[0] = duration
-          uptrend[1] = uptrend_start_date
-          uptrend[2] = uptrend_end_date
-
-        uptrend_start_date = analytic_data.index[i]
-
-      prev = i
-
-
-    downtrend = [-1, "", ""] # [duration, downtrend_start_date, downtrend_end_date]
+    downtrend = [-1, "", ""]  # [duration, downtrend_start_date, downtrend_end_date]
     downtrend_start_date = analytic_data.index[0]
 
     prev = 0
 
     for i in range(1, len(analytic_data)):
+        if analytic_data.iloc[i] > analytic_data.iloc[prev]:
+            downtrend_end_date = analytic_data.index[prev]
+            duration = getDuration(downtrend_start_date, downtrend_end_date)
 
-      if analytic_data.iloc[i] > analytic_data.iloc[prev]:
+            if duration >= downtrend[0]:
+                downtrend[0] = duration
+                downtrend[1] = downtrend_start_date
+                downtrend[2] = downtrend_end_date
 
-        downtrend_end_date = analytic_data.index[prev]
-        duration = getDuration(downtrend_start_date, downtrend_end_date)
+            downtrend_start_date = analytic_data.index[i]
 
-        if duration >= downtrend[0]:
-
-          downtrend[0] = duration
-          downtrend[1] = downtrend_start_date
-          downtrend[2] = downtrend_end_date
-
-        downtrend_start_date = analytic_data.index[i]
-
-      prev = i
+        prev = i
 
     return uptrend, downtrend
 
-def getCorrelationAnalytics(target_stock_ticker, analytic, time = 'all_time', 
-                            ma_analytic = 'NA', ma_window = 'NA'):
-  
-  stock_tickers = getStockTickers(data)
-  combined_df = pd.DataFrame(columns = stock_tickers)
 
-  for stock_ticker in stock_tickers:
+def getCorrelationAnalytics(
+    target_stock_ticker, analytic, time="all_time", ma_analytic="NA", ma_window="NA"
+):
+    stock_tickers = getStockTickers(data)
+    combined_df = pd.DataFrame(columns=stock_tickers)
 
-    stock_data = getStockData(data, stock_ticker)
+    for stock_ticker in stock_tickers:
+        stock_data = getStockData(data, stock_ticker)
 
-    if len(stock_data) <= 60:
-      continue
-    
-    if analytic not in stock_data.columns:
-      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, 
-                                      ma_window)
+        if len(stock_data) <= 60:
+            continue
 
-    else:
-      analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
-    
-    if not isinstance(analytic_data, str):
-      combined_df[f"{stock_ticker}"] = analytic_data[0]
-    
-  
-  combined_df.fillna(method = 'ffill', inplace = True)
-  combined_df.fillna(method = 'bfill', inplace = True)
+        if analytic not in stock_data.columns:
+            analytic_data = getAnalyticData(
+                analytic, stock_ticker, time, ma_analytic, ma_window
+            )
 
-  # Choose the target column for which you want MIC scores
-  target_column = target_stock_ticker
+        else:
+            analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
 
-  # Create a DataFrame to store MIC scores
-  mic_scores = pd.Series(index=combined_df.columns.difference([target_column]), dtype=float)
+        if not isinstance(analytic_data, str):
+            combined_df[f"{stock_ticker}"] = analytic_data[0]
 
-  # Calculate MIC scores for the chosen target column
-  for col in combined_df.columns.difference([target_column]):
-      mine = MINE()
-      mine.compute_score(combined_df
-      [col], combined_df[target_column])
-      mic_scores[col] = mine.mic()
-  
-  mic_scores = mic_scores.sort_values(ascending=False)
-    
-  return mic_scores.to_dict()
+    combined_df.fillna(method="ffill", inplace=True)
+    combined_df.fillna(method="bfill", inplace=True)
+
+    # Choose the target column for which you want MIC scores
+    target_column = target_stock_ticker
+
+    # Create a DataFrame to store MIC scores
+    mic_scores = pd.Series(
+        index=combined_df.columns.difference([target_column]), dtype=float
+    )
+
+    # Calculate MIC scores for the chosen target column
+    for col in combined_df.columns.difference([target_column]):
+        mine = MINE()
+        mine.compute_score(combined_df[col], combined_df[target_column])
+        mic_scores[col] = mine.mic()
+
+    mic_scores = mic_scores.sort_values(ascending=False)
+
+    return mic_scores.to_dict()
