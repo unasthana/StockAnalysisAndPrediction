@@ -145,7 +145,7 @@ def getLongestContinuousTrendsApi(request, stock_ticker, analytic):
     data = getLongestContinuousTrends(
         stock_ticker, analytic, time, ma_window, ma_analytic
     )
-    return JsonResponse(list(data), safe=False)
+    return JsonResponse(list([[str(x) for x in sublist] for sublist in data]), safe=False)
 
 
 def getRankingsApi(request, analytic):

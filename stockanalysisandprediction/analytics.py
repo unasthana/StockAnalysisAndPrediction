@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 from .models import Stock
@@ -365,10 +365,7 @@ def getRankings(analytic, time="all_time", ma_analytic="NA", ma_window="NA"):
 def getDuration(start_date, end_date):
     if not isinstance(start_date, str) and not isinstance(end_date, str):
         x = end_date - start_date
-        if isinstance(x, pd.Timedelta):
-            return x.days
-        else:
-            return x
+        return x.days if isinstance(x, pd.Timedelta) or isinstance(x, timedelta) else int(x)
 
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")
