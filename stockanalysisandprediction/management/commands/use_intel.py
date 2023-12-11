@@ -16,7 +16,7 @@ from stockanalysisandprediction.management.commands.train_prediction_model.py im
 
 def makePrediction(data, stock_ticker):
     # Get Stock Data particular to the corresponding stock ticker.
-    stock_data = getStockData(data, "AAL")
+    stock_data = getStockData(data, stock_ticker)
 
     # Get Target Data. In our case, we are predicting the Close Price of the Stock.
     target_data = getTargetData(stock_data, "close")
@@ -81,12 +81,13 @@ def makeCluster(data, time = '1_week'):
   num_clusters = 5
   kmeans = KMeans(n_clusters=num_clusters, random_state=42)
   combined_df['cluster'] = kmeans.fit_predict(features_standardized)
+  centroids = scaler.inverse_transform(kmeans.cluster_centers_)
 
   combined_df.index = pd.to_datetime(combined_df.index)
 
   cluster_df = combined_df.groupby('Name').last()
 
-  cluster_df = cluster_df[['cluster']]
+  cluster_df = cluster_df[['Daily_Returns', 'Risk', 'cluster']]
   cluster_df = cluster_df.reset_index()
 
-  return cluster_df
+  return cluster_df, centroids
