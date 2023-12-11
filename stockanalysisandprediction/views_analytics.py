@@ -217,6 +217,6 @@ def get_cached_response(api_name, params):
     cache_entry = APICache.objects.filter(api_name=api_name, params=params_json).first()
 
     if cache_entry:
-        return json.loads(cache_entry.response)
+        return cache_entry.response
 
     return None

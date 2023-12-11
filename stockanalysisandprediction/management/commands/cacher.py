@@ -8,8 +8,40 @@ class Command(BaseCommand):
     help = "Cache long running apis"
 
     def handle(self, *args, **kwargs):
+        def cache_clustering(time_list):
+            base_url = "http://127.0.0.1:8000/api/makeCluster/"
+            timeout = 300
+
+            for time in time_list:
+                params = {
+                    "time": time,
+                }
+                try:
+                    response = requests.get(base_url, params=params, timeout=timeout)
+                    if response.status_code == 200:
+                        print(f"Response for {time}: {response.json()}")
+                    else:
+                        print(
+                            f"Error for {time}: {response.status_code} {response.text}"
+                        )
+                except requests.exceptions.RequestException as e:
+                    print(f"Request failed for {time}: {e}")
+
+                sleep(1)
+
+        time_list = [
+            "all_time",
+            "1_week",
+            "2_weeks",
+            "1_month",
+            "1_quarter",
+            "6_months",
+            "1_year",
+        ]
+        cache_clustering(time_list)
+
         def cache_rankings(analytic_list, time_list, ma_analytic_list, ma_window_list):
-            base_url = "http://127.0.0.1:8000/api/getRankingsApi"
+            base_url = lambda x: "http://127.0.0.1:8000/api/getRankings/{x}"
             timeout = 300
 
             for analytic in analytic_list:
@@ -25,7 +57,7 @@ class Command(BaseCommand):
 
                             try:
                                 response = requests.get(
-                                    base_url, params=params, timeout=timeout
+                                    base_url(analytic), params=params, timeout=timeout
                                 )
                                 if response.status_code == 200:
                                     print(f"Response for {analytic}: {response.json()}")
@@ -36,18 +68,9 @@ class Command(BaseCommand):
                             except requests.exceptions.RequestException as e:
                                 print(f"Request failed for {analytic}: {e}")
 
-                        sleep(1)
+                            sleep(1)
 
         analytic_list = ["daily_returns", "daily_price_change", "daily_price_gap"]
-        time_list = [
-            "all_time",
-            "1_week",
-            "2_week",
-            "1_month",
-            "1_quarter",
-            "6_months",
-            "1_year",
-        ]
         ma_analytic_list = ["daily_returns", "daily_price_change", "daily_price_gap"]
         ma_window_list = ["3_day", "5_day", "10_day", "30_day", "60_day"]
-        cache_rankings(analytic_list, time_list, ma_analytic_list, ma_window_list)
+        # cache_rankings(analytic_list, time_list, ma_analytic_list, ma_window_list)

@@ -1,15 +1,23 @@
+import json
+
 import pandas as pd
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
-from stockanalysisandprediction.models import Stock
+from stockanalysisandprediction.models import Stock, APICache
+from stockanalysisandprediction.views_analytics import get_cached_response
 
 
 @api_view(["GET"])
 def makeCluster(request):
     time = request.GET.get("time", "1_week")
+    params = {"time": time}
+    cached_response = get_cached_response("makeCluster", params)
+    if cached_response is not None:
+        return JsonResponse(cached_response, safe=False)
+
     stock_tickers = pd.Series(Stock.objects.values("name").distinct()).apply(
         lambda x: x["name"]
     )
@@ -68,10 +76,18 @@ def makeCluster(request):
     cluster_df = cluster_df[["Daily_Returns", "Risk", "cluster"]]
     cluster_df = cluster_df.reset_index()
 
+    data = {
+        "cluster_df": cluster_df.to_dict(orient="records"),
+        "centroids": centroids.tolist(),
+    }
+
+    APICache.objects.create(
+        api_name="makeCluster",
+        params=json.dumps(params, sort_keys=True),
+        response=data,
+    )
+
     return JsonResponse(
-        {
-            "cluster_df": cluster_df.to_dict(orient="records"),
-            "centroids": centroids.tolist(),
-        },
+        data,
         safe=False,
     )
