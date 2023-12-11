@@ -193,7 +193,9 @@ def getCorrelationAnalyticsApi(request, stock_ticker, analytic):
     if cached_response is not None:
         return JsonResponse(cached_response, safe=False)
 
-    data = getCorrelationAnalytics(stock_ticker, analytic, time, ma_analytic, ma_window).to_dict()
+    data = getCorrelationAnalytics(
+        stock_ticker, analytic, time, ma_analytic, ma_window
+    ).to_dict()
     APICache.objects.create(
         api_name="getCorrelationAnalyticsApi",
         params=json.dumps(params, sort_keys=True),

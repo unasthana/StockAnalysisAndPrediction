@@ -70,13 +70,31 @@ class Command(BaseCommand):
 
                             sleep(1)
 
-        analytic_list = ["daily_returns", "daily_price_change", "daily_price_gap", "yearly_performance", "daily_price_range"]
-        ma_analytic_list = ['NA', 'daily_returns', 'daily_price_change', 'daily_price_gap', "daily_price_gap", "yearly_performance", "daily_price_range"]
-        ma_window_list = ['NA', '3_day', '5_day', '10_day', '30_day', '60_day']
+        analytic_list = [
+            "daily_returns",
+            "daily_price_change",
+            "daily_price_gap",
+            "yearly_performance",
+            "daily_price_range",
+        ]
+        ma_analytic_list = [
+            "NA",
+            "daily_returns",
+            "daily_price_change",
+            "daily_price_gap",
+            "daily_price_gap",
+            "yearly_performance",
+            "daily_price_range",
+        ]
+        ma_window_list = ["NA", "3_day", "5_day", "10_day", "30_day", "60_day"]
         cache_rankings(analytic_list, time_list, ma_analytic_list, ma_window_list)
 
-        def cache_correlations(analytic_list, time_list, ma_analytic_list, ma_window_list):
-            base_url = lambda x, y: f"http://127.0.0.1:8000/api/getCorrelationAnalytics/{x}/{y}/"
+        def cache_correlations(
+            analytic_list, time_list, ma_analytic_list, ma_window_list
+        ):
+            base_url = (
+                lambda x, y: f"http://127.0.0.1:8000/api/getCorrelationAnalytics/{x}/{y}/"
+            )
             timeout = 1000
 
             for analytic in analytic_list:
