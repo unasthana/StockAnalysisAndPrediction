@@ -364,7 +364,11 @@ def getRankings(analytic, time="all_time", ma_analytic="NA", ma_window="NA"):
 
 def getDuration(start_date, end_date):
     if not isinstance(start_date, str) and not isinstance(end_date, str):
-        return (end_date - start_date).days
+        x = end_date - start_date
+        if isinstance(x, pd.Timedelta):
+            return x.days
+        else:
+            return x
 
     start_date = datetime.strptime(start_date, "%Y-%m-%d")
     end_date = datetime.strptime(end_date, "%Y-%m-%d")

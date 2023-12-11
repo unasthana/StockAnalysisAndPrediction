@@ -1,3 +1,5 @@
+import json
+
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from .analytics import (
@@ -13,6 +15,7 @@ from .analytics import (
     getAnalyticData,
     getRawAnalyticData,
 )
+from .models import APICache
 
 
 @api_view(["GET"])
@@ -135,14 +138,6 @@ def getMovingAveragesApi(request, stock_ticker, analytic):
     return JsonResponse(dict(zip(keys, response)), safe=False)
 
 
-def getRankingsApi(request, analytic):
-    time = request.GET.get("time", "all_time")
-    ma_analytic = request.GET.get("ma_analytic", "NA")
-    ma_window = request.GET.get("ma_window", "NA")
-    data = getRankings(analytic, time, ma_analytic, ma_window)
-    return JsonResponse(str(data), safe=False)
-
-
 def getLongestContinuousTrendsApi(request, stock_ticker, analytic):
     time = request.GET.get("time", "all_time")
     ma_window = request.GET.get("ma_window", "NA")
@@ -150,15 +145,66 @@ def getLongestContinuousTrendsApi(request, stock_ticker, analytic):
     data = getLongestContinuousTrends(
         stock_ticker, analytic, time, ma_window, ma_analytic
     )
-    return JsonResponse(str(data), safe=False)
+    return JsonResponse(list(data), safe=False)
+
+
+def getRankingsApi(request, analytic):
+    time = request.GET.get("time", "all_time")
+    ma_analytic = request.GET.get("ma_analytic", "NA")
+    ma_window = request.GET.get("ma_window", "NA")
+
+    # Prepare parameters for cache check
+    params = {
+        "analytic": analytic,
+        "time": time,
+        "ma_analytic": ma_analytic,
+        "ma_window": ma_window,
+    }
+
+    # Check cache
+    cached_response = get_cached_response("getRankingsApi", params)
+    if cached_response is not None:
+        return JsonResponse(cached_response, safe=False)
+
+    # Call the actual function and cache the response
+    data = getRankings(analytic, time, ma_analytic, ma_window)
+    APICache.objects.create(
+        api_name="getRankingsApi",
+        params=json.dumps(params, sort_keys=True),
+        response=data,
+    )
+
+    return JsonResponse(data, safe=False)
 
 
 def getCorrelationAnalyticsApi(request, stock_ticker, analytic):
     time = request.GET.get("time", "all_time")
     ma_analytic = request.GET.get("ma_analytic", "NA")
     ma_window = request.GET.get("ma_window", "NA")
+
+    # Prepare parameters for cache check
+    params = {
+        "stock_ticker": stock_ticker,
+        "analytic": analytic,
+        "time": time,
+        "ma_analytic": ma_analytic,
+        "ma_window": ma_window,
+    }
+
+    # Check cache
+    cached_response = get_cached_response("getCorrelationAnalyticsApi", params)
+    if cached_response is not None:
+        return JsonResponse(cached_response, safe=False)
+
+    # Call the actual function and cache the response
     data = getCorrelationAnalytics(stock_ticker, analytic, time, ma_analytic, ma_window)
-    return JsonResponse(str(data), safe=False)
+    APICache.objects.create(
+        api_name="getCorrelationAnalyticsApi",
+        params=json.dumps(params, sort_keys=True),
+        response=data,
+    )
+
+    return JsonResponse(data, safe=False)
 
 
 def prepare_response(response):
@@ -168,3 +214,13 @@ def prepare_response(response):
 
     response = [str(x) if not isinstance(x, dict) else x for x in response]
     return response
+
+
+def get_cached_response(api_name, params):
+    params_json = json.dumps(params, sort_keys=True)
+    cache_entry = APICache.objects.filter(api_name=api_name, params=params_json).first()
+
+    if cache_entry:
+        return json.loads(cache_entry.response)
+
+    return None

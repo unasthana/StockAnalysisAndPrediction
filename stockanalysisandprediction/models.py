@@ -21,3 +21,9 @@ class CompanyInfo(models.Model):
 
     def __str__(self):
         return f"{self.ticker} - {self.company_name} - {self.sector}"
+
+
+class APICache(models.Model):
+    api_name = models.CharField(max_length=100)
+    params = models.TextField()  # JSON string of parameters
+    response = models.JSONField()
