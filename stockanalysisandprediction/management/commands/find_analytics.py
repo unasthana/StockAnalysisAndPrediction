@@ -1,8 +1,5 @@
-#!pip install minepy
-
 import pandas as pd
 from datetime import datetime
-from minepy import MINE
 
 data = pd.read_csv("/content/all_stocks_5yr.csv")
 data.dropna(inplace=True)
@@ -411,43 +408,34 @@ def getLongestContinuousTrends(
     return uptrend, downtrend
 
 
-def getCorrelationAnalytics(
-    target_stock_ticker, analytic, time="all_time", ma_analytic="NA", ma_window="NA"
-):
-    stock_tickers = getStockTickers(data)
-    combined_df = pd.DataFrame(columns=stock_tickers)
+def getCorrelationAnalytics(target_stock_ticker, analytic, time = 'all_time', 
+                            ma_analytic = 'NA', ma_window = 'NA'):
+  
+  stock_tickers = getStockTickers(data)
+  combined_df = pd.DataFrame(columns = stock_tickers)
 
-    for stock_ticker in stock_tickers:
-        stock_data = getStockData(data, stock_ticker)
+  for stock_ticker in stock_tickers:
 
-        if len(stock_data) <= 60:
-            continue
+    stock_data = getStockData(data, stock_ticker)
 
-        if analytic not in stock_data.columns:
-            analytic_data = getAnalyticData(
-                analytic, stock_ticker, time, ma_analytic, ma_window
-            )
+    if len(stock_data) <= 60:
+      continue
+    
+    if analytic not in stock_data.columns:
+      analytic_data = getAnalyticData(analytic, stock_ticker, time, ma_analytic, 
+                                      ma_window)
 
-        else:
-            analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
+    else:
+      analytic_data = getRawAnalyticData(stock_ticker, analytic, time)
+    
+    if not isinstance(analytic_data, str):
+      combined_df[f"{stock_ticker}"] = analytic_data[0]
+    
+  
+  combined_df.fillna(method = 'ffill', inplace = True)
+  combined_df.fillna(method = 'bfill', inplace = True)
 
-        if not isinstance(analytic_data, str):
-            combined_df[f"{stock_ticker}"] = analytic_data[0]
-
-    combined_df.fillna(method="ffill", inplace=True)
-    combined_df.fillna(method="bfill", inplace=True)
-
-    target_column = target_stock_ticker
-
-    mic_scores = pd.Series(
-        index=combined_df.columns.difference([target_column]), dtype=float
-    )
-
-    for col in combined_df.columns.difference([target_column]):
-        mine = MINE()
-        mine.compute_score(combined_df[col], combined_df[target_column])
-        mic_scores[col] = mine.mic()
-
-    mic_scores = mic_scores.sort_values(ascending=False)
-
-    return mic_scores.to_dict()
+  corr = combined_df.corr()
+  sorted_corr = corr[target_stock_ticker].sort_values(ascending=False).dropna()
+    
+  return sorted_corr[1:]
