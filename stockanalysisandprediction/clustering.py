@@ -43,7 +43,7 @@ def makeCluster(request):
         stock_data = stock_data.tail(time_values[time])
 
         combined_df = pd.concat(
-            [combined_df, stock_data[["Name", "Daily_Returns", "Risk"]]]
+            [combined_df, stock_data[["name", "Daily_Returns", "Risk"]]]
         )
 
     combined_df.fillna(method="bfill", inplace=True)
@@ -59,12 +59,19 @@ def makeCluster(request):
     num_clusters = 5
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     combined_df["cluster"] = kmeans.fit_predict(features_standardized)
+    centroids = scaler.inverse_transform(kmeans.cluster_centers_)
 
     combined_df.index = pd.to_datetime(combined_df.index)
 
-    cluster_df = combined_df.groupby("Name").last()
+    cluster_df = combined_df.groupby("name").last()
 
-    cluster_df = cluster_df[["cluster"]]
+    cluster_df = cluster_df[["Daily_Returns", "Risk", "cluster"]]
     cluster_df = cluster_df.reset_index()
 
-    return JsonResponse(cluster_df.to_dict(), safe=False)
+    return JsonResponse(
+        {
+            "cluster_df": cluster_df.to_dict(orient="records"),
+            "centroids": centroids.tolist(),
+        },
+        safe=False,
+    )

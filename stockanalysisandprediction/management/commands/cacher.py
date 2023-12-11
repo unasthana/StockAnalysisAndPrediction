@@ -38,8 +38,16 @@ class Command(BaseCommand):
 
                         sleep(1)
 
-        analytic_list = ['daily_returns', 'daily_price_change', 'daily_price_gap']
-        time_list = ['all_time', '1_week', '2_week', '1_month', '1_quarter', '6_months', '1_year']
-        ma_analytic_list = ['daily_returns', 'daily_price_change', 'daily_price_gap']
-        ma_window_list = ['3_day', '5_day', '10_day', '30_day', '60_day']
+        analytic_list = ["daily_returns", "daily_price_change", "daily_price_gap"]
+        time_list = [
+            "all_time",
+            "1_week",
+            "2_week",
+            "1_month",
+            "1_quarter",
+            "6_months",
+            "1_year",
+        ]
+        ma_analytic_list = ["daily_returns", "daily_price_change", "daily_price_gap"]
+        ma_window_list = ["3_day", "5_day", "10_day", "30_day", "60_day"]
         cache_rankings(analytic_list, time_list, ma_analytic_list, ma_window_list)
