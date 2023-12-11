@@ -215,6 +215,7 @@ def getRawAnalyticData(stock_ticker, raw_analytic, time='all_time'):
 
 def getAnalyticData(analytic, stock_ticker, time='all_time',
                     ma_analytic='NA', ma_window='NA'):
+    res = None
     if analytic == 'yearly_performance':
         res = getYearlyPerformance(stock_ticker)
 
