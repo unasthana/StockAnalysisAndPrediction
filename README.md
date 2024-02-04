@@ -17,5 +17,8 @@ political events, corporate earnings, market sentiment and so on. These variable
 the inherent volatility of stock prices, make it exceptionally challenging for a potential investor
 to make investment decisions in the stock market.
 
-Please check out our slides for a more detailed information: \
-You can also check out the video demo of our final application: 
+```diff
+- Please check out the following document for a details: StockDataAnalysisAndPrediction.pdf
+- You can also check out the video demo of our final application:
+```
+https://drive.google.com/file/d/10IsO94-hS5198XPP4J-jHEaa6EEol3VW/view?usp=sharing
