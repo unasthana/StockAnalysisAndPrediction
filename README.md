@@ -18,7 +18,11 @@ the inherent volatility of stock prices, make it exceptionally challenging for a
 to make investment decisions in the stock market.
 
 ```diff
-- Please check out the following document for a details: StockDataAnalysisAndPrediction.pdf
+- Stock Data Analytics Script: stockanalysisandprediction/management/commands/find_analytics.py
+- Stock Price Prediction Script: stockanalysisandprediction/management/commands/train_prediction_model.py
+- Stock Clustering Script: stockanalysisandprediction/management/commands/use_intel.py
+
+- Please check out the following document for more details: StockDataAnalysisAndPrediction.pdf
 - You can also check out the video demo of our final application:
 ```
 https://drive.google.com/file/d/10IsO94-hS5198XPP4J-jHEaa6EEol3VW/view?usp=sharing
