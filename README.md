@@ -25,6 +25,6 @@ to make investment decisions in the stock market.
 - Please check out the following document for more details: StockDataAnalysisAndPrediction.pdf
 - You can also check out the video demo of our final application:
 ```
-https://drive.google.com/file/d/10IsO94-hS5198XPP4J-jHEaa6EEol3VW/view?usp=sharing
+Video Demo: https://drive.google.com/file/d/10IsO94-hS5198XPP4J-jHEaa6EEol3VW/view?usp=sharing
 
 Front End Repository: https://github.com/pprasannasai/StockPredictionDashboards
